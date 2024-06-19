@@ -61,6 +61,23 @@ const BD6 = [ // n = 4 // invalid board
     B, Q, B, B,
     B, B, B, Q
 ]
+const BD7 = [ // n = 5 // invalid board 
+    B, B, B, B, B,
+    B, B, B, B, B,
+    B, B, B, B, B,
+    B, B, B, B, B,
+    B, B, B, B, B,
+    
+]
+const BD8 = [ // n = 6 // invalid board 
+    B, B, B, B, B, B, 
+    B, B, B, B, B, B,
+    B, B, B, B, B, B,
+    B, B, B, B, B, B,
+    B, B, B, B, B, B, 
+    B, B, B, B, B, B,
+    
+]
 
 /**** Functions ****/
 // Integer Integer Board Integer -> Value
@@ -110,19 +127,19 @@ function setValue(value, i, j, bd, n) {
 // produces a solution to the n-queens problem or false if there's no solution
 // assuming that the given board is initially empty
 // checkExpect(solveBoard(BD2, 3), false)
-// checkExpect(solveBoard([B]), [Q], TEST_ARRAY_MODE)
-checkExpect(solveBoard(BD1, 4), BD4, TEST_ARRAY_MODE)
+// checkExpect(solveBoard([B], 1), [Q], TEST_ARRAY_MODE)
+// checkExpect(solveBoard(BD1, 4), BD4, TEST_ARRAY_MODE)
 
 
 // see README.md page to understand why I structured the function this way
 function solveBoard(bd, n) {
     function solveBD(bd) {
-        if (isValidSolution(bd, n)) {
+        if (OneQueensPerColumn(bd, n)) { // if (trivial condition)
             return bd
         }
         else {
-            let nb = nextBoards(bd, n)
-            return solveLOBD(nb) // bd subs don't exists: we generate them
+            //generate only valid boards
+            return solveLOBD(nextBoards(bd, n)) // bd subs don't exists: we generate them
         }
     }
 
@@ -130,11 +147,11 @@ function solveBoard(bd, n) {
         if (lobd.length == 0) { // we ran out of choice
             return false
         } else {
-            const trybd = solveBD(lobd[0])
-            if (trybd != false) {
-                return trybd
+            const trybd = solveBD(lobd[0]) // return Board or false if it's the solution 
+            if (trybd != false) { // it's the solution
+                return trybd // return the solution
             } else {
-                return solveLOBD(lobd.slice(1))
+                return solveLOBD(lobd.slice(1)) // return Board or false if solution in the rest of options
             }
 
         }
@@ -249,8 +266,56 @@ function firstEmptyColumn(bd, n) {
 }
 
 
+function generateEmptyBoard(n) {
+    let arr = []
+    for (let i = 0; i < n*n; i++) {
+        arr.push(B)
+    }
+    return arr
+}
+
+// Example
+
+initVisuals(generateEmptyBoard(4), 4)
+
+document.getElementById("btn").addEventListener("click", function() {
+    const N = document.getElementById("in").value
+    const EMPTYBD = generateEmptyBoard(N)
+    initVisuals(EMPTYBD, N)
+    updateVisual(solveBoard(EMPTYBD, N))
+})
 
 
+
+function initVisuals(bd, n) {
+    const BOARD = document.getElementById("bd")
+    while (BOARD.childNodes.length != 0) {
+        BOARD.childNodes[0].remove()
+    }
+    BOARD.style.gridTemplateColumns = `repeat(${n}, 60px)`
+    let square;
+    for (let i = 0; i < bd.length; i++) {
+        square = document.createElement("div")
+        if (bd[i] == Q) {
+            square.classList.add("queen")
+        }
+        BOARD.appendChild(square)
+    }
+}
+
+function updateVisual(bd, n) {
+    const BOARD = document.getElementById("bd")
+    let squares = BOARD.childNodes
+    squares.forEach(element => {
+        element.classList.remove("queen")
+    });
+    for (let i = 0; i < bd.length; i++) {
+        if (bd[i] == Q) {
+            squares[i].classList.add("queen")
+        }
+    }
+
+}
 
 
 
@@ -286,3 +351,20 @@ function checkExpect(value, expected, isArr = false) {
         ? console.log("test passed")
         : console.error(`test didn't pass, expected [[${expected}]] but got [[${value}]]`);
 }
+
+
+
+function printMat(BD, n) {
+    let line;
+    for (let i = 0; i < n; i++) {
+        line = ""
+        for (let j = 0; j < n; j++) {
+            line += (BD[ijToPos(i, j, n)] === false ? "B" : "Q")
+            line += "  "
+        }
+        console.log(line);
+
+    }
+}
+
+// printMat(solveBoard(BD8, 6), 6)
