@@ -111,7 +111,7 @@ function setValue(value, i, j, bd, n) {
 // assuming that the given board is initially empty
 // checkExpect(solveBoard(BD2, 3), false)
 // checkExpect(solveBoard([B]), [Q], TEST_ARRAY_MODE)
-// checkExpect(solveBoard(BD1, 4), BD5, TEST_ARRAY_MODE)
+checkExpect(solveBoard(BD1, 4), BD4, TEST_ARRAY_MODE)
 
 
 // see README.md page to understand why I structured the function this way
@@ -121,7 +121,8 @@ function solveBoard(bd, n) {
             return bd
         }
         else {
-            return solveLOBD(nextBoards(bd)) // bd subs don't exists: we generate them
+            let nb = nextBoards(bd, n)
+            return solveLOBD(nb) // bd subs don't exists: we generate them
         }
     }
 
@@ -130,7 +131,7 @@ function solveBoard(bd, n) {
             return false
         } else {
             const trybd = solveBD(lobd[0])
-            if (!trybd) {
+            if (trybd != false) {
                 return trybd
             } else {
                 return solveLOBD(lobd.slice(1))
@@ -149,12 +150,12 @@ function solveBoard(bd, n) {
 // - there's a queen in each column
 // - the queens don't attack each others
 
-checkExpect(solveBoard(BD1, 4), false)
-checkExpect(solveBoard(BD2, 3), false)
-checkExpect(solveBoard(BD3, 3), false)
-checkExpect(solveBoard(BD5, 4), false)
-checkExpect(solveBoard(BD6, 4), false)
-checkExpect(solveBoard(BD4, 4), true)
+checkExpect(isValidSolution(BD1, 4), false)
+checkExpect(isValidSolution(BD2, 3), false)
+checkExpect(isValidSolution(BD3, 3), false)
+checkExpect(isValidSolution(BD5, 4), false)
+checkExpect(isValidSolution(BD6, 4), false)
+checkExpect(isValidSolution(BD4, 4), true)
 
 
 
@@ -206,16 +207,46 @@ function getQueensPositions(bd, n) {
 }
 
 
-
-function solveBoard(bd, n) {
+function isValidSolution(bd, n) {
     return OneQueensPerColumn(bd, n) && noAttacks(getQueensPositions(bd, n))
 }
 
 
 
 
+// Board -> (Array of Board)
+// produce the next boards, or an empty array if there's nothing we can add
+
+function nextBoards(bd, n) {
+    let result = []
+    let col = firstEmptyColumn(bd, n)
+    if (col != -1) {
+        for (let i = 0; i < n; i++) {
+            let solution = setValue(Q, i, col, bd, n)
+            if (noAttacks(getQueensPositions(solution, n))) {
+                result.push(solution)
+            }
+        }
+    }
+    return result
+}
 
 
+function firstEmptyColumn(bd, n) {
+    let empty
+    for (let i = 0; i < n; i++) { // i is col
+        empty = true
+        for (let j = 0; j < n; j++) {
+            if (bd[ijToPos(j, i, n)] == Q) {
+                empty = false
+            }
+        }
+        if (empty) {
+            return i
+        }
+    }
+    return -1
+}
 
 
 
@@ -238,7 +269,6 @@ function testArray(value, expected) {
         for (let i = 0; i < value.length; i++) {
             if (value[i] !== expected[i]) {
                 return false
-
             }
         }
         return true
